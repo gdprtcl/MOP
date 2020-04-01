@@ -141,6 +141,22 @@ stages:
     timeoutInMinutes: 0
     steps:
     - template: diabetes_regression-get-model-version-template.yml
+
+    - task: Bash@3
+      displayName: 'Install YQ'
+      inputs:
+        targetType: 'inline'
+        script: |
+          apt-get install sudo -y
+          sudo apt-get -y install yq
+
+    - task: Bash@3
+      displayName: 'Add keys to AKS config'
+      inputs:
+        targetType: 'inline'
+        script: |
+          yq w -i $(Build.SourcesDirectory)/$(SOURCES_DIR_TRAIN)/scoring/deployment_config_aks.yml keys.primaryKey aH3ad9XQ5KY7ullyfBkKp7SgUKlMlJCb
+          yq w -i $(Build.SourcesDirectory)/$(SOURCES_DIR_TRAIN)/scoring/deployment_config_aks.yml keys.secondaryKey cH3ad9XQ5KY7ullyfBkKp7SgUKlMlJCb
     - task: ms-air-aiagility.vss-services-azureml.azureml-model-deploy-task.AMLModelDeploy@0
       displayName: 'Azure ML Model Deploy'
       inputs:
